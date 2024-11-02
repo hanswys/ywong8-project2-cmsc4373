@@ -1,11 +1,8 @@
-<h1>Computer Square</h1>
-<form>
-    <div class="form-group">
-        <label for="number">Enter a number: </label>
-        <input type="number" name="number" id="number"
-            required min="1" max="100" class="form-control"
-            placeholder="Enter a number 1 ~ 100">
-    </div>
-    <button type="submit" class="btn btn-outline-primary">Submit</button>
+<div id="div-create-button" class="d-block"></div>
+    <form id="form-create" class="d-inline" role="create">
+    <input class="w-50" type="text" name="createKey" required minlength="2" placeholder="Item name">
+    <button class="btn btn-outline-success" type="submit">Create</button>
 </form>
-<ul id="display" class="bg-success bg-opacity-25"></ul>
+</div>
+<hr>
+<div id="home-root" class="row mt-3"></div>
