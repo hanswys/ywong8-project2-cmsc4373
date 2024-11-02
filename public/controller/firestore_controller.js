@@ -14,3 +14,18 @@ export async function addInventory(inventory){
     const docRef = await addDoc(collRef, inventory.toFirestore());
     return docRef.id; 
 }
+
+export async function getInventoryList(uid){
+    let inventoryList = [];
+    const coll = collection(db, INVENTORY_COLL);
+    const q = query(coll, 
+        where('uid', '==', uid), 
+        orderBy('timestamp', 'desc'),);
+    const snapShot = await getDocs(q);
+    snapShot.forEach(doc => {
+        const p = new Inventory(doc.data());
+        p.set_docId(doc.id);
+        inventoryList.push(p);
+    });
+    return inventoryList;
+}

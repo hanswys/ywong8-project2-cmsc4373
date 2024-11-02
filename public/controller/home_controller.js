@@ -24,4 +24,32 @@ try {
     alert('Failed to save inventory: ' + JSON.stringify(error));
     return;
 }
+homePageView();
+}
+
+export async function updateInventory(e){
+    const content = e.target.value.trim();  
+    if(content.length == 0){
+        // delete the item if empty 
+        try {
+            await deleteToDoItem(li.id);
+            li.remove();
+        } catch (e){
+            if (DEV) console.log('failed to delete', e);
+            alert('Failed to delete: ' + JSON.stringify(e));
+        }
+    } else {
+        // update the trim
+        const update = {content};
+        try {
+            await updateToDoItem(li.id, update);
+            const span = li.children[0];
+            span.textContent = content;
+            const input = li.children[1];
+            input.value = content;
+        }catch (e){
+            if (DEV) console.log('failed to update', e);
+            alert('Failed to update: ' + JSON.stringify(e));
+        }
+    }
 }
