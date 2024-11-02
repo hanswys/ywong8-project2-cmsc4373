@@ -29,3 +29,8 @@ export async function getInventoryList(uid){
     });
     return inventoryList;
 }
+
+export async function deleteInventory(docId){
+    const docRef = doc(db, INVENTORY_COLL, docId);
+    await deleteDoc(docRef);
+}

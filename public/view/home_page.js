@@ -1,7 +1,7 @@
 import { currentUser } from "../controller/firebase_auth.js";
 import { root } from "./element.js";
 import { protectedView } from "./protected_view.js";
-import { onClickCreateButton } from "../controller/home_controller.js";
+import { onClickCreateButton, onClickUpdateButton } from "../controller/home_controller.js";
 import { getInventoryList } from "../controller/firestore_controller.js";
 import { Inventory } from "../model/Inventory.js";
 
@@ -106,6 +106,7 @@ export function createInventoryView(inventory) {
 
     updateButton.addEventListener('click', () => {
         console.log('current inventory:' + inventory.quantity);
+        onClickUpdateButton(inventory.quantity)
     });
 
     cancelButton.addEventListener('click', () => {
