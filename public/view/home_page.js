@@ -1,11 +1,10 @@
 import { currentUser } from "../controller/firebase_auth.js";
 import { root } from "./element.js";
 import { protectedView } from "./protected_view.js";
-import { onClickCreateButton, onClickUpdateButton } from "../controller/home_controller.js";
+import { onSubmitCreateForm, onClickAddButton, onClickCancelButton, onClickMinusButton, onClickUpdateButton } from "../controller/home_controller.js";
+import { DEV } from "../model/constants.js";
 import { getInventoryList } from "../controller/firestore_controller.js";
-import { Inventory } from "../model/Inventory.js";
 
-let inventoryList = null;
 
 export async function homePageView() {
     if (!currentUser) {
@@ -17,101 +16,64 @@ export async function homePageView() {
         { cache: 'no-store' });
     const divWrapper = document.createElement('div');
     divWrapper.innerHTML = await response.text();
-    divWrapper.classList.add('m-4', 'p-4')
-    divWrapper.querySelector('#form-create').onsubmit = onClickCreateButton;
-    let homeRoot = divWrapper.querySelector('#home-root');
+    divWrapper.classList.add('m-4', 'p-4');
+    const container = divWrapper.querySelector('#inventory-container');
+    const form = divWrapper.querySelector('form');
+    form.onsubmit = onSubmitCreateForm;
 
 
     root.innerHTML = '';
     root.appendChild(divWrapper);
-
-
-    if (inventoryList == null) {
-        homeRoot.innerHTML = '<h2>Loading ...</h2>'
+    let inventoryList;
+    if(inventoryList == null){
         try {
             inventoryList = await getInventoryList(currentUser.uid);
+            console.log(inventoryList);
         } catch (e) {
-            homeRoot.innerHTML = '';
-            console.log('failed to read: ', e);
-            alert('Failed to get photomemo list: ' + JSON.stringify(e));
+            if (DEV) console.log('Failed to get title list', e);
+            alert('Failed to get title list: ' + JSON.stringify(e));
             return;
         }
     }
+   
 
     if (inventoryList.length == 0) {
-        homeRoot.innerHTML = '<h2>No photomemo has been added!</h2>'
+        container.innerHTML = '<h2>No inventory has been added!</h2>'
         return;
-
     }
 
-    homeRoot.innerHTML = '';
-    inventoryList.forEach(p => {
-        const cardView = createInventoryView(p);
-        homeRoot.appendChild(cardView);
+    container.innerHTML = '';
+    // const container = divWrapper.querySelector('#inventory-container');
+    inventoryList.forEach(title => {
+        container.appendChild(buildCard(title));
     });
+
 }
 
+export function buildCard(inventory) {
+    const div = document.createElement('div');
+    div.classList.add('card', 'd-inline-block');
+    div.style = "width: 25rem;";
+    div.innerHTML = `
+        <div id="${inventory.docId}" class="card-body" data-original-quantity="${inventory.quantity}">
+            <span class="fs-3 card-title">${inventory.title}</span>
+            <button id="minus" class="btn btn-outline-danger">-</button>
+            <span class="fs-3 card-title">${inventory.quantity}</span>
+            <button id="add" class="btn btn-outline-primary">+</button>
+            <button id="update" class="btn btn-outline-primary">Update</button>
+            <button id="cancel" class="btn btn-outline-secondary">Cancel</button>
+        </div>
+    `;
+    const minusButton = div.querySelector('#minus');
+    const addButton = div.querySelector('#add');
+    const updateButton = div.querySelector('#update');
+    const cancelButton = div.querySelector('#cancel');
 
-export function createInventoryView(inventory) {
-    const cardView = document.createElement('div');
-    cardView.classList.add('card');
+    minusButton.onclick = onClickMinusButton;
+    addButton.onclick = onClickAddButton;
+    updateButton.onclick = onClickUpdateButton;
+    cancelButton.onclick = onClickCancelButton;
 
-    const cardBody = document.createElement('div');
-    cardBody.classList.add('card-body');
-    cardView.appendChild(cardBody);
 
-    const h5 = document.createElement('h5');
-    h5.classList.add('card-title');
-    h5.innerText = inventory.name;
-    cardBody.appendChild(h5);
-
-    const buttonGroup = document.createElement('div');
-    buttonGroup.classList.add('button-group');
-
-    const minusButton = document.createElement('button');
-    minusButton.classList.add('minus');
-    minusButton.innerText = '-';
-    buttonGroup.appendChild(minusButton);
-
-    const quantityDisplay = document.createElement('span');
-    quantityDisplay.innerText = inventory.quantity;
-    buttonGroup.appendChild(quantityDisplay);
-
-    const plusButton = document.createElement('button');
-    plusButton.classList.add('plus');
-    plusButton.innerText = '+';
-    buttonGroup.appendChild(plusButton);
-
-    const updateButton = document.createElement('button');
-    updateButton.classList.add('update');
-    updateButton.innerText = 'Update';
-    buttonGroup.appendChild(updateButton);
-
-    const cancelButton = document.createElement('button');
-    cancelButton.classList.add('cancel');
-    cancelButton.innerText = 'Cancel';
-    buttonGroup.appendChild(cancelButton);
-
-    cardBody.appendChild(buttonGroup);
-
-    minusButton.addEventListener('click', () => {
-        quantityDisplay.innerText = --inventory.quantity;
-        console.log(inventory.quantity);
-    });
-
-    plusButton.addEventListener('click', () => {
-        quantityDisplay.innerText = ++inventory.quantity;
-        console.log(inventory.quantity);
-    });
-
-    updateButton.addEventListener('click', () => {
-        console.log('current inventory:' + inventory.quantity);
-        onClickUpdateButton(inventory.quantity)
-    });
-
-    cancelButton.addEventListener('click', () => {
-        
-    });
-
-    return cardView;
+    return div;
 }

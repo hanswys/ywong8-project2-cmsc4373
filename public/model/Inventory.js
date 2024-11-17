@@ -1,11 +1,11 @@
 export class Inventory{
-    constructor(data){
-        if(!data) return;
-        this.name = data.name;
+    constructor(data, docId){
+        this.title = data.title;
         this.uid = data.uid;
         this.quantity = data.quantity;
-        this.createdBy = data.createdBy; //email
+        this.createdBy = data.createdBy; 
         this.timestamp = data.timestamp;
+        this.docId = docId;
     }
 
     set_docId(id){
@@ -14,7 +14,7 @@ export class Inventory{
 
     toFirestore(){
         return {
-            name: this.name,
+            title: this.title,
             uid: this.uid,
             quantity: this.quantity,
             createdBy: this.createdBy,
