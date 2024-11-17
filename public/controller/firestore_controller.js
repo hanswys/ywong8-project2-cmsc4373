@@ -46,3 +46,19 @@ export async function deleteInventory(docId){
     const docRef = doc(db, INVENTORY_COLL, docId);
     await deleteDoc(docRef);
 }
+export async function checkForDuplicate(uid, title) {
+    const duplicateQuery = query(
+        collection(db, INVENTORY_COLL),
+        where("uid", "==", uid),
+        where("title", "==", title)
+    );
+    const duplicateSnapshot = await getDocs(duplicateQuery);
+
+    if (!duplicateSnapshot.empty) {
+        const existingDoc = duplicateSnapshot.docs[0];
+        const existingData = existingDoc.data();
+        return { isDuplicate: true, docId: existingDoc.id, data: existingData };
+    }
+
+    return { isDuplicate: false };
+}

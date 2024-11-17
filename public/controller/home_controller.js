@@ -1,17 +1,23 @@
 import { Inventory } from "../model/Inventory.js";
 import { homePageView, buildCard } from "../view/home_page.js";
 import { currentUser } from "./firebase_auth.js";
-import { addInventory, updateInventory, deleteInventory } from "./firestore_controller.js";
+import { addInventory, updateInventory, deleteInventory, checkForDuplicate } from "./firestore_controller.js";
 import { DEV } from "../model/constants.js";
 
 export async function onSubmitCreateForm(e){
     e.preventDefault();
-    const title = e.target.title.value;
-    console.log(title);
+    const title = e.target.title.value.toLowerCase().trim();
     const uid = currentUser.uid;
     const quantity = 1;
     const timestamp = Date.now();
     const createdBy = currentUser.email;
+    const duplicateResult = await checkForDuplicate(uid, title);
+    
+    if (duplicateResult.isDuplicate) {
+        alert(`${title} already exists. Update quantity instead.`);
+        return;
+    }
+
     const inventory = new Inventory({title, uid, quantity, createdBy, timestamp});
 
     let docId;
